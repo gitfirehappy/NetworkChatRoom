@@ -3,8 +3,24 @@
   "WorkspaceRootPath": "E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{9A90C8C8-234E-42BC-AD8D-BA98E547FF02}|NetworkChatRoom\\NetworkChatRoom.vcxproj|E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\Test.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{9A90C8C8-234E-42BC-AD8D-BA98E547FF02}|NetworkChatRoom\\NetworkChatRoom.vcxproj|solutionrelative:NetworkChatRoom\\Test.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{9A90C8C8-234E-42BC-AD8D-BA98E547FF02}|NetworkChatRoom\\NetworkChatRoom.vcxproj|E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{9A90C8C8-234E-42BC-AD8D-BA98E547FF02}|NetworkChatRoom\\NetworkChatRoom.vcxproj|solutionrelative:NetworkChatRoom\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A90C8C8-234E-42BC-AD8D-BA98E547FF02}|NetworkChatRoom\\NetworkChatRoom.vcxproj|E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\ChatClient.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{9A90C8C8-234E-42BC-AD8D-BA98E547FF02}|NetworkChatRoom\\NetworkChatRoom.vcxproj|solutionrelative:NetworkChatRoom\\ChatClient.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A90C8C8-234E-42BC-AD8D-BA98E547FF02}|NetworkChatRoom\\NetworkChatRoom.vcxproj|E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\ChatClient.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{9A90C8C8-234E-42BC-AD8D-BA98E547FF02}|NetworkChatRoom\\NetworkChatRoom.vcxproj|solutionrelative:NetworkChatRoom\\ChatClient.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A90C8C8-234E-42BC-AD8D-BA98E547FF02}|NetworkChatRoom\\NetworkChatRoom.vcxproj|E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\ChatServer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{9A90C8C8-234E-42BC-AD8D-BA98E547FF02}|NetworkChatRoom\\NetworkChatRoom.vcxproj|solutionrelative:NetworkChatRoom\\ChatServer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A90C8C8-234E-42BC-AD8D-BA98E547FF02}|NetworkChatRoom\\NetworkChatRoom.vcxproj|E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\ChatServer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{9A90C8C8-234E-42BC-AD8D-BA98E547FF02}|NetworkChatRoom\\NetworkChatRoom.vcxproj|solutionrelative:NetworkChatRoom\\ChatServer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,28 +30,84 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
             },
             {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Test.cpp",
-              "DocumentMoniker": "E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\Test.cpp",
-              "RelativeDocumentMoniker": "NetworkChatRoom\\Test.cpp",
-              "ToolTip": "E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\Test.cpp",
-              "RelativeToolTip": "NetworkChatRoom\\Test.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAApAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-12-15T15:28:05.174Z",
-              "EditorCaption": ""
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "main.cpp",
+              "DocumentMoniker": "E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\main.cpp",
+              "RelativeDocumentMoniker": "NetworkChatRoom\\main.cpp",
+              "ToolTip": "E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\main.cpp",
+              "RelativeToolTip": "NetworkChatRoom\\main.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-12-16T14:53:19.877Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ChatClient.h",
+              "DocumentMoniker": "E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\ChatClient.h",
+              "RelativeDocumentMoniker": "NetworkChatRoom\\ChatClient.h",
+              "ToolTip": "E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\ChatClient.h",
+              "RelativeToolTip": "NetworkChatRoom\\ChatClient.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-12-16T14:35:04.407Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ChatServer.h",
+              "DocumentMoniker": "E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\ChatServer.h",
+              "RelativeDocumentMoniker": "NetworkChatRoom\\ChatServer.h",
+              "ToolTip": "E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\ChatServer.h",
+              "RelativeToolTip": "NetworkChatRoom\\ChatServer.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-12-16T14:34:49.736Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ChatClient.cpp",
+              "DocumentMoniker": "E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\ChatClient.cpp",
+              "RelativeDocumentMoniker": "NetworkChatRoom\\ChatClient.cpp",
+              "ToolTip": "E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\ChatClient.cpp",
+              "RelativeToolTip": "NetworkChatRoom\\ChatClient.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-12-16T14:34:04.16Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ChatServer.cpp",
+              "DocumentMoniker": "E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\ChatServer.cpp",
+              "RelativeDocumentMoniker": "NetworkChatRoom\\ChatServer.cpp",
+              "ToolTip": "E:\\mycode\\c\u002B\u002B\\NetworkChatRoom\\NetworkChatRoom\\NetworkChatRoom\\ChatServer.cpp",
+              "RelativeToolTip": "NetworkChatRoom\\ChatServer.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-12-16T14:33:36.929Z",
+              "EditorCaption": ""
             }
           ]
         },
