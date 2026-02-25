@@ -1,7 +1,13 @@
-﻿  ChatServer.cpp
+﻿  ChatClient.cpp
+  ChatServer.cpp
+  Logger.cpp
+  main.cpp
+  Room.cpp
+  RoomManager.cpp
+  UserManager.cpp
   正在生成代码
-  227 of 434 functions (52.3%) were compiled, the rest were copied from previous compilation.
-    149 functions were new in current compilation
-    36 functions had inline decision re-evaluated but remain unchanged
+  1344 of 1530 functions (87.8%) were compiled, the rest were copied from previous compilation.
+    1189 functions were new in current compilation
+    19 functions had inline decision re-evaluated but remain unchanged
   已完成代码的生成
   NetworkChatRoom.vcxproj -> E:\mycode\c++\NetworkChatRoom\NetworkChatRoom\x64\Release\NetworkChatRoom.exe
