@@ -1,16 +1,22 @@
-#pragma once
+ï»¿#pragma once
 #include<unordered_map>
 #include<string>
 #include<utility>
 #include<iostream>
 #include"User.h"
+#include<vector>
 
 class UserManager {
 public:
-	bool ReadRegistry(const std::string& fileName) const;	// ¶ÁÈ¡×¢²á±íµ½»º´æ
+	static UserManager& GetInstance();
+	
+	explicit UserManager(const std::string& registryFile = "registry.txt");
+	~UserManager(); // æ·»åŠ ææ„å‡½æ•°æ¥ä¿å­˜æ•°æ®
 
+	bool ReadRegistry(const std::string& fileName);	// è¯»å–æ³¨å†Œè¡¨åˆ°ç¼“å­˜
+	bool SaveRegistry(const std::string& fileName); // æ·»åŠ ä¿å­˜åŠŸèƒ½
 	bool Register(const std::string& username, const std::string& password);
-	bool Login(int id, const std::string& password);
+	bool Login(int id, const std::string& password, SOCKET socket);
 	bool CancelAccount(int id, const std::string& password);
 	bool HasRegisted(int id) const;
 	bool CheckPassword(int id, const std::string& password);
@@ -21,13 +27,22 @@ public:
 	bool HasUser(int id) const;  
 
 	int GetNextUserID();
+	
+	// æ·»åŠ ç”¨æˆ·åˆ°å½“å‰è¿æ¥åˆ—è¡¨
+	void AddConnectedUser(int id, const std::string& username, SOCKET socket);
+	// ç§»é™¤è¿æ¥ç”¨æˆ·
+	void RemoveConnectedUser(int id);
+	// è·å–å½“å‰åœ¨çº¿ç”¨æˆ·åˆ—è¡¨
+	std::vector<User*> GetOnlineUsers() const;
+
 private:
-	// µ±Ç°Á¬½ÓµÄUsers¹ÜÀí
+	// å½“å‰è¿æ¥çš„Usersç®¡ç†
 	std::unordered_map<std::string, User> m_usersByName;
 	std::unordered_map<int, User> m_usersByID;
 	
-	// ¼ÇÂ¼ËùÓĞÓÃ»§ĞÅÏ¢µÄ»º´æ±í£¨´ÓÎÄ¼şÖĞ¶ÁÈ¡£©
+	// è®°å½•æ‰€æœ‰ç”¨æˆ·ä¿¡æ¯çš„ç¼“å­˜è¡¨ï¼ˆä»æ–‡ä»¶ä¸­è¯»å–ï¼‰
 	std::unordered_map<int,std::pair<std::string,std::string>> m_registryCache;
 
-	int m_nextUserID = 1;	// TODO: Éú³ÉIDÂß¼­ĞèÒªÓÅ»¯
+	int m_nextUserID = 1;
+	std::string m_registryFile;
 };

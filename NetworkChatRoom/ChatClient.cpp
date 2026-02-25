@@ -1,9 +1,9 @@
-// �ͻ���ʵ��
+﻿// 客户端实现
 #include"ChatClient.h"
 
 ChatClient::ChatClient(const std::string& serverIp, int port)
-    : m_serverIp(serverIp), m_port(port), m_socket(INVALID_SOCKET), m_isRunning(false), m_exitMessage("EXIT") {
-    // ��ʼ��Winsock
+    : m_serverIp(serverIp), m_port(port), m_socket(INVALID_SOCKET), m_isRunning(false) {
+    // 初始化 Winsock
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         throw std::runtime_error("WSAStartup failed");
@@ -18,13 +18,13 @@ ChatClient::~ChatClient() {
 void ChatClient::Start() {
     if (m_isRunning) return;
 
-    // ����socket
+    // 创建 socket
     m_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (m_socket == INVALID_SOCKET) {
         throw std::runtime_error("socket failed");
     }
 
-    // ���ӷ�����
+    // 连接服务器
     sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(m_port);
@@ -55,7 +55,16 @@ void ChatClient::ReceiveLoop() {
     while (m_isRunning) {
         bytesReceived = recv(m_socket, buffer, BUFFER_SIZE, 0);
         if (bytesReceived > 0) {
-            std::cout << "Server: " << std::string(buffer,bytesReceived) << "\n";
+            std::string msg(buffer, bytesReceived);
+            
+            // 特殊处理清屏命令
+            if (msg.find("\033[2J\033[H") != std::string::npos) {
+                system("cls"); // Windows 系统清屏
+                continue;
+            }
+            
+            std::cout << msg;
+            if(msg[msg.length()-1] != '\n') std::cout << std::endl; // 确保换行
         }
         else if (bytesReceived == 0) {
             std::cout << "Server disconnected\n";
@@ -72,10 +81,13 @@ void ChatClient::SendLoop() {
     std::string message;
     while (m_isRunning) {
         std::getline(std::cin, message);
-        if (message == m_exitMessage) {
-            m_isRunning = false;
-            break;
+        
+        // 处理特殊命令
+        if (message == "/Exit_Server") {
+            send(m_socket, message.c_str(), static_cast<int>(message.size()), 0);
+            break; // 直接退出循环，因为服务器会关闭连接
         }
+        
         send(m_socket, message.c_str(), static_cast<int>(message.size()), 0);
     }
 }

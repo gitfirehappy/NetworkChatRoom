@@ -1,9 +1,9 @@
-// Èë¿ÚÎÄ¼ş
+ï»¿// å…¥å£æ–‡ä»¶
 #include"ChatServer.h"
 #include"ChatClient.h"
 
 int main() {
-    // Ñ¡ÔñÔËĞĞÄ£Ê½: 0=·şÎñÆ÷, 1=¿Í»§¶Ë
+    // é€‰æ‹©è¿è¡Œæ¨¡å¼: 0=æœåŠ¡å™¨, 1=å®¢æˆ·ç«¯
     int mode;
     std::cout << "Enter mode (0=Server, 1=Client): ";
     std::cin >> mode;

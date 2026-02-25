@@ -1,7 +1,7 @@
-#include"Room.h"
+﻿#include"Room.h"
 
-Room::Room(int id, const std::string& name, int ownerID, const std::string& password = "")
-	: m_id(id), m_name(name), m_ownerID(ownerID), m_password(password) {
+Room::Room(int id, const std::string& name, int ownerID, const std::string& password, int maxUsers)
+	: m_id(id), m_name(name), m_ownerID(ownerID), m_password(password), m_maxUsers(maxUsers) {
 
 }
 
@@ -29,6 +29,10 @@ bool Room::CheckPassword(const std::string& password) const {
 	return m_password == password;
 }
 
+int Room::GetMaxUsers() const {
+    return m_maxUsers;
+}
+
 void Room::AddUser(int userID) {
 	if (!m_users.count(userID)) {
 		m_users.insert(userID);
@@ -36,7 +40,7 @@ void Room::AddUser(int userID) {
 }
 
 void Room::RemoveUser(int userID) {
-	if (!m_users.count(userID)) {
+	if (m_users.count(userID)) {
 		m_users.erase(userID);
 	}
 }

@@ -1,17 +1,16 @@
-#pragma once
+ï»¿#pragma once
 #include<string>
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 
-// ÓÃ»§×´Ì¬
+// ç”¨æˆ·çŠ¶æ€
 enum class UserStatus {
-	IN_LOBBY,	// ÔÚ´óÌü
-	IN_ROOM,	// ÔÚ·¿¼ä
-	IN_PRIVATE	// ÔÚË½ÁÄ
+	IN_LOBBY,	// åœ¨å¤§å…
+	IN_ROOM,	// åœ¨æˆ¿é—´
 };
 
 /**
-* ÓÃ»§Àà
+* ç”¨æˆ·ç±»
 */
 class User {
 public:
@@ -20,28 +19,22 @@ public:
 	
 	};
 
-	~User() {
-	
-	};
+	~User() {};
 
 	int GetID() const { return m_id; };
 	std::string GetUsername() const { return m_username; };
 	SOCKET GetSocket() const { return m_socket; };
 	UserStatus GetUserStatus() const { return m_status; };
 	int GetRoomID() const { return m_currentRoomID; };
-	int GetPrivateChatWithID() const { return m_privateChatWithID; };
-
 	void SetStatus(UserStatus status) { m_status = status; };
 	void SetRoom(int roomID) { m_currentRoomID = roomID; };
-	void SetPrivateChat(int userID) { m_privateChatWithID = userID; };
 	void SetPassword(const std::string& password) { m_password = password; };
 
 private:
-	int m_id;						// ÓÃ»§ID
-	std::string m_username;			// ÓÃ»§Ãû
-	std::string m_password;			// ÃÜÂë
-	SOCKET m_socket;				// ÓÃ»§socket
-	UserStatus m_status;			// ÓÃ»§×´Ì¬
-	int m_currentRoomID;			// µ±Ç°ËùÔÚ·¿¼äID
-	int m_privateChatWithID;		// Ë½ÁÄ¶ÔÏóID
+	int m_id;						// ç”¨æˆ·ID
+	std::string m_username;			// ç”¨æˆ·å
+	std::string m_password;			// å¯†ç 
+	SOCKET m_socket;				// ç”¨æˆ· socket
+	UserStatus m_status;			// ç”¨æˆ·çŠ¶æ€
+	int m_currentRoomID;			// å½“å‰æ‰€åœ¨æˆ¿é—´ID
 };

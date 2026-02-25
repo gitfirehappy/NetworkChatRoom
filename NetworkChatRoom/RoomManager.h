@@ -1,18 +1,23 @@
-#pragma once
+ï»¿#pragma once
 #include<unordered_map>
 #include<vector>
 #include"Room.h"
 
 class RoomManager {
 public:
-    Room* CreateRoom(const std::string& name, int ownerID, const std::string& password = "");
+    static RoomManager& GetInstance();
+    
+    Room* CreateRoom(const std::string& name, int ownerID, const std::string& password = "", int maxUsers = 10);
     bool JoinRoom(int roomID, int userID, const std::string& password = "");
-    bool LeaveRoom(int roomID, int userID); // Èô·¿Ö÷ÍË³öÔò½âÉ¢·¿¼ä
-    Room* GetRoom(int roomID) const;
+    bool LeaveRoom(int roomID, int userID); // è‹¥æˆ¿ä¸»é€€å‡ºåˆ™è§£æ•£æˆ¿é—´
+    bool DeleteRoom(int roomID); // åˆ é™¤æˆ¿é—´
+    Room* GetRoom(int roomID);
     std::vector<Room*> GetAllRooms() const;
+    bool IsRoomExists(int roomID) const; // æ£€æŸ¥æˆ¿é—´æ˜¯å¦å­˜åœ¨
+    int GetNextRoomID(); // è·å–ä¸‹ä¸€ä¸ªæˆ¿é—´ID
 
 private:
-    // µ±Ç°Á¬½ÓµÄRoom¹ÜÀí
+    // å½“å‰è¿æ¥çš„Roomç®¡ç†
     std::unordered_map<int, Room> m_rooms;
     int m_nextRoomID = 1;
 };

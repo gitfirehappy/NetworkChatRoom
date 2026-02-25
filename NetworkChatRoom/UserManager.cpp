@@ -1,32 +1,95 @@
-#include"UserManager.h"
+ï»¿#include"UserManager.h"
+#include <fstream>
+#include <sstream>
 
-bool UserManager::Register(const std::string& username, const std::string& password) {
-	int userID = m_nextUserID++;
-	m_registryCache[userID] = { username,password };
-	// ÕâÀï²»×öÎÄ¼ş±£´æ£¬µÈÍË³öÇ°×Ô¶¯×öÒ»´Î±£´æ£¬ĞÔÄÜÓÑºÃ
+UserManager::UserManager(const std::string& registryFile) : m_registryFile(registryFile) {
+	ReadRegistry(registryFile);
+}
 
-	std::cout << "Regist success";
+UserManager::~UserManager() {
+	SaveRegistry(m_registryFile);
+}
+
+UserManager& UserManager::GetInstance() {
+	static UserManager instance("registry.txt");
+	return instance;
+}
+
+bool UserManager::SaveRegistry(const std::string& fileName) {
+	std::ofstream file(fileName);
+	if (!file) {
+		std::cerr << "Failed to save registry file: " << fileName << std::endl;
+		return false;
+	}
+
+	for (const auto& pair : m_registryCache) {
+		file << pair.first << " " << pair.second.first << " " << pair.second.second << std::endl;
+	}
+
 	return true;
 }
 
-bool UserManager::Login(int id, const std::string& password) {
+bool UserManager::Register(const std::string& username, const std::string& password) {
+	int userID = m_nextUserID++;
+	m_registryCache[userID] = { username, password };
+	// ä¿å­˜åˆ°æ–‡ä»¶
+	SaveRegistry(m_registryFile);
+	
+	std::cout << "Register success! Your ID is: " << userID << std::endl;
+	return true;
+}
+
+bool UserManager::Login(int id, const std::string& password, SOCKET socket) {
 	if (!HasRegisted(id)) {
-		// ÌáÊ¾ÏÈ×¢²á
-		std::cout << "This ID hasn't registed.Please regist first";
+		// æç¤ºå…ˆæ³¨å†Œ
+		std::cout << "This ID hasn't registered. Please register first." << std::endl;
 		return false;
 	}
 
 	if (!CheckPassword(id, password)) {
-		std::cout << "Incorrect password to ID, please re-enter it";
+		std::cout << "Incorrect password for ID, please re-enter it." << std::endl;
 		return false;
 	}
 
-	const std::string username = m_registryCache[id].first;
-	User user(id, username, INVALID_SOCKET);
-	m_usersByID[id] = user;
-	m_usersByName[username] = user;
-	user.SetStatus(UserStatus::IN_LOBBY);
+	const std::string& username = m_registryCache[id].first;
+	AddConnectedUser(id, username, socket);
 	return true;
+}
+
+void UserManager::AddConnectedUser(int id, const std::string& username, SOCKET socket) {
+	User user(id, username, socket);
+	m_usersByID.emplace(id, user);
+	m_usersByName.emplace(username, user);
+	
+	// æ›´æ–°ç”¨æˆ·çŠ¶æ€
+	auto userByIdIt = m_usersByID.find(id);
+	if (userByIdIt != m_usersByID.end()) {
+		userByIdIt->second.SetStatus(UserStatus::IN_LOBBY);
+		userByIdIt->second.SetRoom(-1);
+	}
+
+	auto userByNameIt = m_usersByName.find(username);
+	if (userByNameIt != m_usersByName.end()) {
+		userByNameIt->second.SetStatus(UserStatus::IN_LOBBY);
+		userByNameIt->second.SetRoom(-1);
+	}
+}
+
+void UserManager::RemoveConnectedUser(int id) {
+	auto it = m_usersByID.find(id);
+	if (it != m_usersByID.end()) {
+		std::string username = it->second.GetUsername();
+		m_usersByID.erase(id);
+		m_usersByName.erase(username);
+	}
+}
+
+std::vector<User*> UserManager::GetOnlineUsers() const {
+	std::vector<User*> users;
+	for (auto& pair : m_usersByID) {
+		users.push_back(const_cast<User*>(&pair.second));
+	}
+	return users;
 }
 
 bool UserManager::CancelAccount(int id, const std::string& password) {
@@ -40,16 +103,36 @@ bool UserManager::CancelAccount(int id, const std::string& password) {
 		return false;
 	}
 
-	// Ö»ÔÊĞíÔÚ×¢²á½×¶Î×¢Ïú£¬ËùÒÔ²»ÓÃµ÷Õûµ±Ç°Users¹ÜÀí±í
+	// åªå…è®¸åœ¨æ³¨å†Œé˜¶æ®µæ³¨é”€ï¼Œæ‰€ä»¥ä¸ç”¨è°ƒæ•´å½“å‰Usersç®¡ç†è¡¨
 
 	m_registryCache.erase(id);
-	// Í¬Àí£¬µÈÍË³öÔÙ¸²Ğ´ÎÄ¼ş
+	// åŒç†ï¼Œç­‰é€€å‡ºå†è¦†å†™æ–‡ä»¶
 
 	return true;
 }
 
-bool UserManager::ReadRegistry(const std::string& fileName) const {
+bool UserManager::ReadRegistry(const std::string& fileName) {
+	std::ifstream file(fileName);
+	if (!file) {
+		std::cerr << "Failed to open registry file: " << fileName << std::endl;
+		return false;
+	}
 
+	std::string line;
+	while (std::getline(file, line)) {
+		std::istringstream iss(line);
+		int id;
+		std::string username, password;
+		if (iss >> id >> username >> password) {
+			m_registryCache[id] = { username, password };
+		}
+	}
+
+	if (!m_registryCache.empty()) {
+		m_nextUserID = m_registryCache.cbegin()->first + 1; // TODO:ä¸ä¸€å®šæ˜¯æœ€å¤§çš„
+	}
+
+	return true;
 }
 
 bool UserManager::CheckPassword(int id, const std::string& password) {

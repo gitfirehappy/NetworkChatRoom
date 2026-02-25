@@ -1,14 +1,14 @@
-#pragma once
+ï»¿#pragma once
 #include<string>
 #include<unordered_map>
 #include<unordered_set>
 
 /**
-* ·¿¼äÀà
+* æˆ¿é—´ç±»
 */
 class Room {
 public:
-	Room(int id, const std::string& name,int ownerID, const std::string& password = "");
+	Room(int id, const std::string& name,int ownerID, const std::string& password = "", int maxUsers = 10);
 	~Room();
 
 	int GetID() const;
@@ -16,6 +16,7 @@ public:
     int GetOwnerID() const;
 	bool HasPassword() const;
     bool CheckPassword(const std::string& password) const;
+	int GetMaxUsers() const; // è·å–æœ€å¤§ç”¨æˆ·æ•°
 
 	void AddUser(int userID);
 	void RemoveUser(int userID);
@@ -24,9 +25,10 @@ public:
 	const std::unordered_set<int>& GetUsers() const;
 
 private:
-	int m_id;		// ·¿¼äID
-	std::string m_name;		// ·¿¼äÃû³Æ
-	int m_ownerID;			// ·¿Ö÷ID
-	std::string m_password;	// ·¿¼äÃÜÂë
-	std::unordered_set<int> m_users;	// ·¿¼äÓÃ»§¼¯ºÏ
+	int m_id;		// æˆ¿é—´ID
+	std::string m_name;		// æˆ¿é—´åç§°
+	int m_ownerID;			// æˆ¿ä¸»ID
+	std::string m_password;	// æˆ¿é—´å¯†ç 
+	int m_maxUsers;			// æœ€å¤§ç”¨æˆ·æ•°
+	std::unordered_set<int> m_users;	// æˆ¿é—´ç”¨æˆ·é›†åˆ
 };
