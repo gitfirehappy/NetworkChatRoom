@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <fstream>
 #include <string>
 #include <mutex>
@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iomanip>
 #include <chrono>
+#include <windows.h>
 
 class Logger {
 public:
@@ -15,6 +16,7 @@ public:
 private:
     Logger();
     ~Logger();
+    std::string GetExecutablePath();
     std::ofstream m_logFile;
     std::mutex m_mutex;
 };

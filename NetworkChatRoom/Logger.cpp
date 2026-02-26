@@ -1,9 +1,10 @@
-﻿#include "Logger.h"
+#include "Logger.h"
 
 Logger::Logger() {
-    m_logFile.open("chat_server.log", std::ios::app);
+    std::string logPath = GetExecutablePath() + "\\chat_server.log";
+    m_logFile.open(logPath, std::ios::app);
     if (!m_logFile) {
-        throw std::runtime_error("Failed to open log file");
+        throw std::runtime_error("Failed to open log file: " + logPath);
     }
 }
 
@@ -14,6 +15,17 @@ Logger::~Logger() {
 Logger& Logger::GetInstance() {
     static Logger instance;
     return instance;
+}
+
+std::string Logger::GetExecutablePath() {
+    char buffer[MAX_PATH];
+    GetModuleFileNameA(NULL, buffer, MAX_PATH);
+    std::string path(buffer);
+    size_t lastSlash = path.find_last_of("\\/");
+    if (lastSlash != std::string::npos) {
+        return path.substr(0, lastSlash);
+    }
+    return ".";
 }
 
 void Logger::Log(const std::string& message) {

@@ -1,0 +1,16 @@
+[2026-02-26 09:36:07] Server started on port 8888
+[2026-02-26 09:37:04] Command executed: /register cfy
+[2026-02-26 09:38:53] Command executed: /login 1
+[2026-02-26 09:39:34] Command executed: /register cfy2
+[2026-02-26 09:39:48] Command executed: /login 2
+[2026-02-26 09:41:59] Command unknown: /hel
+[2026-02-26 09:42:49] Command unknown: /room_lis
+[2026-02-26 09:43:03] Command unknown: /Exit_Lobb
+[2026-02-26 09:44:15] Command unknown: /Exit_Serve
+[2026-02-26 09:45:39] Command unknown: /Exit_Lobb
+[2026-02-26 09:45:54] Command unknown: /clear_scree
+[2026-02-26 09:46:07] Command unknown: /create_roo
+[2026-02-26 09:46:21] Command unknown: /user_in_roo
+[2026-02-26 09:46:34] Command unknown: /Exit_Roo
+[2026-02-26 09:46:48] Command unknown: /enter_roo
+[2026-02-26 09:47:04] Command unknown: /Exit_Serve

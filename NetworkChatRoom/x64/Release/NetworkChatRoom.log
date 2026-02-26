@@ -1,13 +1,12 @@
-﻿  ChatClient.cpp
-  ChatServer.cpp
+﻿  ChatServer.cpp
+E:\mycode\c++\NetworkChatRoom\NetworkChatRoom\NetworkChatRoom\ChatServer.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“ChatServer.cpp”)
+  
   Logger.cpp
-  main.cpp
-  Room.cpp
-  RoomManager.cpp
   UserManager.cpp
   正在生成代码
-  1344 of 1530 functions (87.8%) were compiled, the rest were copied from previous compilation.
-    1189 functions were new in current compilation
-    19 functions had inline decision re-evaluated but remain unchanged
+  93 of 1617 functions ( 5.8%) were compiled, the rest were copied from previous compilation.
+    11 functions were new in current compilation
+    90 functions had inline decision re-evaluated but remain unchanged
   已完成代码的生成
   NetworkChatRoom.vcxproj -> E:\mycode\c++\NetworkChatRoom\NetworkChatRoom\x64\Release\NetworkChatRoom.exe

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include<iostream>
 #include<unordered_map>
 #include<string>
@@ -16,6 +16,15 @@
 // 默认端口号与缓冲区大小
 constexpr int PORT = 8888;
 constexpr int BUFFER_SIZE = 1024;
+
+// ANSI 颜色代码
+const std::string COLOR_RESET = "\033[0m";
+const std::string COLOR_RED = "\033[31m";
+const std::string COLOR_GREEN = "\033[32m";
+const std::string COLOR_YELLOW = "\033[33m";
+const std::string COLOR_BLUE = "\033[34m";
+const std::string COLOR_MAGENTA = "\033[35m";
+const std::string COLOR_CYAN = "\033[36m";
 
 /**
  * 聊天服务器类

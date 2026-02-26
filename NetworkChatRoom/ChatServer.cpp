@@ -116,12 +116,20 @@ void ChatServer::ClientHandler(SOCKET clientSocket) {
 	}
 
 	// 发送欢迎消息和注册/登录提示
-	std::string welcomeMsg = "Welcome to Chat Server!\nPlease register(/register <username> <password>) or login(/login <id> <password>)\n";
-	send(clientSocket, welcomeMsg.c_str(), static_cast<int>(welcomeMsg.size()), 0);
+		std::string welcomeMsg = COLOR_GREEN + "Welcome to Chat Server!\n" + COLOR_RESET + 
+			"Please register(" + COLOR_CYAN + "/register <username> <password>" + COLOR_RESET + ") or login(" + COLOR_CYAN + "/login <id> <password>" + COLOR_RESET + ")\n";
+		send(clientSocket, welcomeMsg.c_str(), static_cast<int>(welcomeMsg.size()), 0);
 
 	while ((bytesReceived = recv(clientSocket, buffer, BUFFER_SIZE, 0)) > 0) {
 		std::string message(buffer, bytesReceived);
-		message.pop_back(); // 移除换行符
+		// 只有当消息末尾有换行符时才移除
+		if (!message.empty() && message.back() == '\n') {
+			message.pop_back();
+		}
+		// 处理可能存在的回车符
+		if (!message.empty() && message.back() == '\r') {
+			message.pop_back();
+		}
 		
 		std::cout << "Client[" << clientID << "]: " << message << "\n";
 		
@@ -152,11 +160,13 @@ void ChatServer::ClientHandler(SOCKET clientSocket) {
 		if (user->GetUserStatus() == UserStatus::IN_ROOM) {
 			// 如果用户在房间内，只向房间内成员广播
 			int roomID = user->GetRoomID();
-			std::string formattedMessage = "[ROOM-" + std::to_string(roomID) + "] [" + user->GetUsername() + "]: " + message;
+			std::string formattedMessage = COLOR_YELLOW + "[ROOM-" + std::to_string(roomID) + "] " + COLOR_RESET + 
+				COLOR_BLUE + "[" + user->GetUsername() + "]" + COLOR_RESET + ": " + message;
 			BroadcastToRoom(formattedMessage, roomID, clientSocket);
 		} else {
 			// 否则向大厅所有用户广播
-			std::string formattedMessage = "[LOBBY] [" + user->GetUsername() + "]: " + message;
+			std::string formattedMessage = COLOR_CYAN + "[LOBBY] " + COLOR_RESET + 
+				COLOR_BLUE + "[" + user->GetUsername() + "]" + COLOR_RESET + ": " + message;
 			BroadcastMessage(formattedMessage, clientSocket);
 		}
 	}
@@ -236,19 +246,22 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 		iss >> username >> password;
 		
 		if (userManager.Register(username, password)) {
-			std::string response = "Registration successful!\n";
+			std::string response = COLOR_GREEN + "Registration successful!\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command executed: /register " + username);
 		} else {
-			std::string response = "Registration failed!\n";
+			std::string response = COLOR_RED + "Registration failed!\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command failed: /register " + username);
 		}
 		return true;
 	}
 	
 	// 处理需要登录的命令
 	if (!currentUser && command != "/login") {
-		std::string response = "Please login first!\n";
+		std::string response = COLOR_YELLOW + "Please login first!\n" + COLOR_RESET;
 		send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+		Logger::GetInstance().Log("Command failed: " + command + " (User not logged in)");
 		return true;
 	}
 	
@@ -259,24 +272,28 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 		iss >> id >> password;
 		
 		if (userManager.Login(id, password, clientSocket)) {
-			std::string response = "Login successful! Welcome to the lobby.\n";
+			std::string response = COLOR_GREEN + "Login successful! Welcome to the lobby.\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command executed: /login " + std::to_string(id));
 		} else {
-			std::string response = "Login failed!\n";
+			std::string response = COLOR_RED + "Login failed!\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command failed: /login " + std::to_string(id));
 		}
 		return true;
 	}
 	
 	// 如果用户没有登录，但尝试执行需要登录的命令
 	if (!currentUser) {
+		Logger::GetInstance().Log("Command failed: " + command + " (User not logged in)");
 		return false; // 不是有效命令或用户未登录
 	}
 	
 	// 退出服务器命令
 	if (command == "/Exit_Server") {
-		std::string response = "Disconnecting from server...\n";
+		std::string response = COLOR_YELLOW + "Disconnecting from server...\n" + COLOR_RESET;
 		send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+		Logger::GetInstance().Log("Command executed: /Exit_Server by user " + std::to_string(currentUser->GetID()));
 		closesocket(clientSocket); // 直接关闭连接
 		return true;
 	}
@@ -284,17 +301,19 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 	// 退出大厅命令
 	if (command == "/Exit_Lobby") {
 		currentUser->SetStatus(UserStatus::IN_LOBBY);
-		std::string response = "Returned to login stage. Please login again.\n";
+		std::string response = COLOR_YELLOW + "Returned to login stage. Please login again.\n" + COLOR_RESET;
 		send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
 		userManager.RemoveConnectedUser(currentUser->GetID());
+		Logger::GetInstance().Log("Command executed: /Exit_Lobby by user " + std::to_string(currentUser->GetID()));
 		return true;
 	}
 	
 	// 退出房间命令
 	if (command == "/Exit_Room") {
 		if (currentUser->GetUserStatus() != UserStatus::IN_ROOM) {
-			std::string response = "You are not in a room!\n";
+			std::string response = COLOR_RED + "You are not in a room!\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command failed: /Exit_Room by user " + std::to_string(currentUser->GetID()) + " (Not in room)");
 			return true;
 		}
 		
@@ -304,16 +323,18 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 		currentUser->SetStatus(UserStatus::IN_LOBBY);
 		currentUser->SetRoom(-1);
 		
-		std::string response = "Exited room " + std::to_string(roomID) + ". Returned to lobby.\n";
+		std::string response = COLOR_GREEN + "Exited room " + std::to_string(roomID) + ". Returned to lobby.\n" + COLOR_RESET;
 		send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+		Logger::GetInstance().Log("Command executed: /Exit_Room by user " + std::to_string(currentUser->GetID()) + " from room " + std::to_string(roomID));
 		return true;
 	}
 	
 	// 踢出用户命令（仅房主可用）
 	if (command == "/Kick_Out") {
 		if (currentUser->GetUserStatus() != UserStatus::IN_ROOM) {
-			std::string response = "You are not in a room!\n";
+			std::string response = COLOR_RED + "You are not in a room!\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command failed: /Kick_Out by user " + std::to_string(currentUser->GetID()) + " (Not in room)");
 			return true;
 		}
 		
@@ -322,8 +343,9 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 		Room* room = roomManager.GetRoom(roomID);
 		
 		if (!room || room->GetOwnerID() != currentUser->GetID()) {
-			std::string response = "You are not the room owner!\n";
+			std::string response = COLOR_RED + "You are not the room owner!\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command failed: /Kick_Out by user " + std::to_string(currentUser->GetID()) + " (Not room owner)");
 			return true;
 		}
 		
@@ -332,8 +354,9 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 		
 		User* userToKick = userManager.GetUser(userID);
 		if (!userToKick || !room->ContainsUser(userID)) {
-			std::string response = "User not found in this room!\n";
+			std::string response = COLOR_RED + "User not found in this room!\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command failed: /Kick_Out by user " + std::to_string(currentUser->GetID()) + " (User not found in room)");
 			return true;
 		}
 		
@@ -341,17 +364,19 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 		userToKick->SetStatus(UserStatus::IN_LOBBY);
 		userToKick->SetRoom(-1);
 		
-		std::string response = "User " + std::to_string(userID) + " has been kicked out of the room.\n";
+		std::string response = COLOR_YELLOW + "User " + std::to_string(userID) + " has been kicked out of the room.\n" + COLOR_RESET;
 		send(userToKick->GetSocket(), response.c_str(), static_cast<int>(response.size()), 0);
 		send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+		Logger::GetInstance().Log("Command executed: /Kick_Out by user " + std::to_string(currentUser->GetID()) + " kicked user " + std::to_string(userID) + " from room " + std::to_string(roomID));
 		return true;
 	}
 	
 	// 查看房间用户列表命令
 	if (command == "/user_in_room") {
 		if (currentUser->GetUserStatus() != UserStatus::IN_ROOM) {
-			std::string response = "You are not in a room!\n";
+			std::string response = COLOR_RED + "You are not in a room!\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command failed: /user_in_room by user " + std::to_string(currentUser->GetID()) + " (Not in room)");
 			return true;
 		}
 		
@@ -360,24 +385,26 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 		Room* room = roomManager.GetRoom(roomID);
 		
 		if (!room) {
-			std::string response = "Room not found!\n";
+			std::string response = COLOR_RED + "Room not found!\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command failed: /user_in_room by user " + std::to_string(currentUser->GetID()) + " (Room not found)");
 			return true;
 		}
 		
-		std::string userList = "Users in room " + std::to_string(roomID) + ":\n";
+		std::string userList = COLOR_CYAN + "Users in room " + std::to_string(roomID) + ":\n" + COLOR_RESET;
 		for (int userID : room->GetUsers()) {
 			User* user = userManager.GetUser(userID);
 			if (user) {
-				userList += "- " + std::to_string(userID) + ": " + user->GetUsername();
+				userList += COLOR_BLUE + "- " + std::to_string(userID) + ": " + user->GetUsername() + COLOR_RESET;
 				if (user->GetID() == room->GetOwnerID()) {
-					userList += " (Owner)";
+					userList += COLOR_GREEN + " (Owner)" + COLOR_RESET;
 				}
 				userList += "\n";
 			}
 		}
 		
 		send(clientSocket, userList.c_str(), static_cast<int>(userList.size()), 0);
+		Logger::GetInstance().Log("Command executed: /user_in_room by user " + std::to_string(currentUser->GetID()) + " in room " + std::to_string(roomID));
 		return true;
 	}
 	
@@ -398,11 +425,13 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 			currentUser->SetStatus(UserStatus::IN_ROOM);
 			currentUser->SetRoom(newRoom->GetID());
 			
-			std::string response = "Room created successfully! Room ID: " + std::to_string(newRoom->GetID()) + "\n";
+			std::string response = COLOR_GREEN + "Room created successfully! Room ID: " + std::to_string(newRoom->GetID()) + "\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command executed: /create_room by user " + std::to_string(currentUser->GetID()) + " created room " + std::to_string(newRoom->GetID()) + " (" + roomName + ")");
 		} else {
-			std::string response = "Failed to create room!\n";
+			std::string response = COLOR_RED + "Failed to create room!\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command failed: /create_room by user " + std::to_string(currentUser->GetID()) + " (" + roomName + ")");
 		}
 		return true;
 	}
@@ -412,20 +441,21 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 		RoomManager& roomManager = RoomManager::GetInstance();
 		std::vector<Room*> rooms = roomManager.GetAllRooms();
 		
-		std::string roomList = "Available rooms:\n";
+		std::string roomList = COLOR_CYAN + "Available rooms:\n" + COLOR_RESET;
 		if (rooms.empty()) {
-			roomList += "No rooms available.\n";
+			roomList += COLOR_YELLOW + "No rooms available.\n" + COLOR_RESET;
 		} else {
 			for (Room* room : rooms) {
 				User* owner = userManager.GetUser(room->GetOwnerID());
-				roomList += "- Room ID: " + std::to_string(room->GetID()) + 
-						   ", Name: " + room->GetName() +
-						   ", Owner: " + (owner ? owner->GetUsername() : "Unknown") +
-						   ", Users: " + std::to_string(room->GetUserCount()) + "/" + std::to_string(room->GetMaxUsers()) + "\n";
+				roomList += COLOR_BLUE + "- Room ID: " + std::to_string(room->GetID()) + 
+					   ", Name: " + room->GetName() +
+					   ", Owner: " + (owner ? owner->GetUsername() : "Unknown") +
+					   ", Users: " + std::to_string(room->GetUserCount()) + "/" + std::to_string(room->GetMaxUsers()) + "\n" + COLOR_RESET;
 			}
 		}
 		
 		send(clientSocket, roomList.c_str(), static_cast<int>(roomList.size()), 0);
+		Logger::GetInstance().Log("Command executed: /room_list by user " + std::to_string(currentUser->GetID()));
 		return true;
 	}
 	
@@ -436,15 +466,17 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 		iss >> roomID >> password;
 		
 		if (currentUser->GetUserStatus() == UserStatus::IN_ROOM) {
-			std::string response = "You are already in a room! Please exit first.\n";
+			std::string response = COLOR_RED + "You are already in a room! Please exit first.\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command failed: /enter_room by user " + std::to_string(currentUser->GetID()) + " (Already in room)");
 			return true;
 		}
 		
 		RoomManager& roomManager = RoomManager::GetInstance();
 		if (!roomManager.IsRoomExists(roomID)) {
-			std::string response = "Room does not exist!\n";
+			std::string response = COLOR_RED + "Room does not exist!\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command failed: /enter_room by user " + std::to_string(currentUser->GetID()) + " (Room " + std::to_string(roomID) + " does not exist)");
 			return true;
 		}
 		
@@ -452,11 +484,13 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 			currentUser->SetStatus(UserStatus::IN_ROOM);
 			currentUser->SetRoom(roomID);
 			
-			std::string response = "Successfully joined room " + std::to_string(roomID) + "!\n";
+			std::string response = COLOR_GREEN + "Successfully joined room " + std::to_string(roomID) + "!\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command executed: /enter_room by user " + std::to_string(currentUser->GetID()) + " joined room " + std::to_string(roomID));
 		} else {
-			std::string response = "Failed to join room! Wrong password or room is full.\n";
+			std::string response = COLOR_RED + "Failed to join room! Wrong password or room is full.\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
+			Logger::GetInstance().Log("Command failed: /enter_room by user " + std::to_string(currentUser->GetID()) + " (Room " + std::to_string(roomID) + ")");
 		}
 		return true;
 	}
@@ -464,21 +498,22 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 	// 帮助命令
 	if (command == "/help") {
 		std::string helpText = 
-			"Available commands:\n"
-			"/register <username> <password> - Register a new account\n"
-			"/login <id> <password> - Login to your account\n"
-			"/Exit_Server - Exit the server\n"
-			"/Exit_Lobby - Return to login stage\n"
-			"/Exit_Room - Exit current room\n"
-			"/Kick_Out <user_id> - Kick user from room (owner only)\n"
-			"/user_in_room - Show users in current room\n"
-			"/create_room <name> <password> <max_users> - Create a new room\n"
-			"/room_list - Show all available rooms\n"
-			"/enter_room <room_id> <password> - Enter a room\n"
-			"/help - Show this help message\n"
-			"/clear_screen - Clear screen (client side)\n";
+			COLOR_MAGENTA + "Available commands:\n" + COLOR_RESET
+			+ COLOR_BLUE + "/register <username> <password>" + COLOR_RESET + " - Register a new account\n"
+			+ COLOR_BLUE + "/login <id> <password>" + COLOR_RESET + " - Login to your account\n"
+			+ COLOR_BLUE + "/Exit_Server" + COLOR_RESET + " - Exit the server\n"
+			+ COLOR_BLUE + "/Exit_Lobby" + COLOR_RESET + " - Return to login stage\n"
+			+ COLOR_BLUE + "/Exit_Room" + COLOR_RESET + " - Exit current room\n"
+			+ COLOR_BLUE + "/Kick_Out <user_id>" + COLOR_RESET + " - Kick user from room (owner only)\n"
+			+ COLOR_BLUE + "/user_in_room" + COLOR_RESET + " - Show users in current room\n"
+			+ COLOR_BLUE + "/create_room <name> <password> <max_users>" + COLOR_RESET + " - Create a new room\n"
+			+ COLOR_BLUE + "/room_list" + COLOR_RESET + " - Show all available rooms\n"
+			+ COLOR_BLUE + "/enter_room <room_id> <password>" + COLOR_RESET + " - Enter a room\n"
+			+ COLOR_BLUE + "/help" + COLOR_RESET + " - Show this help message\n"
+			+ COLOR_BLUE + "/clear_screen" + COLOR_RESET + " - Clear screen (client side)\n";
 		
 		send(clientSocket, helpText.c_str(), static_cast<int>(helpText.size()), 0);
+		Logger::GetInstance().Log("Command executed: /help by user " + std::to_string(currentUser->GetID()));
 		return true;
 	}
 	
@@ -486,8 +521,10 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 	if (command == "/clear_screen") {
 		std::string clearCmd = "\033[2J\033[H"; // ANSI 转义序列清屏
 		send(clientSocket, clearCmd.c_str(), static_cast<int>(clearCmd.size()), 0);
+		Logger::GetInstance().Log("Command executed: /clear_screen by user " + std::to_string(currentUser->GetID()));
 		return true;
 	}
 	
+	Logger::GetInstance().Log("Command unknown: " + command);
 	return false; // 不是有效命令
 }

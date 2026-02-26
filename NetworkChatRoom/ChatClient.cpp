@@ -1,4 +1,4 @@
-﻿// 客户端实现
+// 客户端实现
 #include"ChatClient.h"
 
 ChatClient::ChatClient(const std::string& serverIp, int port)
@@ -82,8 +82,11 @@ void ChatClient::SendLoop() {
     while (m_isRunning) {
         std::getline(std::cin, message);
         
+        // 添加换行符，确保服务器能正确接收
+        message += "\n";
+        
         // 处理特殊命令
-        if (message == "/Exit_Server") {
+        if (message == "/Exit_Server\n") {
             send(m_socket, message.c_str(), static_cast<int>(message.size()), 0);
             break; // 直接退出循环，因为服务器会关闭连接
         }

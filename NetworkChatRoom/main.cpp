@@ -1,12 +1,18 @@
 ﻿// 入口文件
 #include"ChatServer.h"
 #include"ChatClient.h"
+#include <limits>
 
 int main() {
     // 选择运行模式: 0=服务器, 1=客户端
-    int mode;
+    int mode = -1;
     std::cout << "Enter mode (0=Server, 1=Client): ";
-    std::cin >> mode;
+    if (!(std::cin >> mode)) {
+        std::cerr << "Invalid input. Please run again and enter 0 or 1.\n";
+        std::cin.clear();
+        std::cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
+        return 1;
+    }
     std::cin.ignore();
 
     try {
@@ -29,4 +35,6 @@ int main() {
         std::cerr << "Error: " << e.what() << "\n";
         return 1;
     }
+
+    return 0;
 }

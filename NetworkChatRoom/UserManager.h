@@ -4,7 +4,6 @@
 #include<utility>
 #include<iostream>
 #include"User.h"
-#include<vector>
 
 class UserManager {
 public:
@@ -24,7 +23,7 @@ public:
 	User* GetUser(const std::string& username);
 	User* GetUser(int id);
 	bool HasUser(const std::string& username) const;  
-	bool HasUser(int id) const;  
+	bool HasUser(int id) const;
 
 	int GetNextUserID();
 	
@@ -36,13 +35,16 @@ public:
 	std::vector<User*> GetOnlineUsers() const;
 
 private:
-	// 当前连接的Users管理
-	std::unordered_map<std::string, User> m_usersByName;
-	std::unordered_map<int, User> m_usersByID;
+	// 当前连接的Users管理 - 使用ID作为唯一键，用户名可能重复
+	std::unordered_map<std::string, User> m_usersByName;  // 保留用于快速查找，但注意可能有重复
+	std::unordered_map<int, User> m_usersByID;            // 主要管理容器，ID唯一
 	
 	// 记录所有用户信息的缓存表（从文件中读取）
 	std::unordered_map<int,std::pair<std::string,std::string>> m_registryCache;
 
 	int m_nextUserID = 1;
 	std::string m_registryFile;
+	
+	// 辅助方法
+	int CalculateNextUserID() const;
 };
