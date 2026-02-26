@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include<unordered_map>
 #include<vector>
 #include"Room.h"
@@ -9,7 +9,7 @@ public:
     
     Room* CreateRoom(const std::string& name, int ownerID, const std::string& password = "", int maxUsers = 10);
     bool JoinRoom(int roomID, int userID, const std::string& password = "");
-    bool LeaveRoom(int roomID, int userID); // 若房主退出则解散房间
+    bool LeaveRoom(int roomID, int userID, bool isKick = false); // 若房主退出则解散房间
     bool DeleteRoom(int roomID); // 删除房间
     Room* GetRoom(int roomID);
     std::vector<Room*> GetAllRooms() const;

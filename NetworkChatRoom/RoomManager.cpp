@@ -1,4 +1,4 @@
-﻿#include "RoomManager.h"
+#include "RoomManager.h"
 
 RoomManager& RoomManager::GetInstance() {
     static RoomManager instance;
@@ -8,6 +8,7 @@ RoomManager& RoomManager::GetInstance() {
 Room* RoomManager::CreateRoom(const std::string& name, int ownerID, const std::string& password, int maxUsers) {
     int roomID = m_nextRoomID++;
     Room room(roomID, name, ownerID, password, maxUsers);
+    room.AddUser(ownerID);
     auto inserted = m_rooms.emplace(roomID, room);
     if (!inserted.second) {
         return nullptr;
@@ -30,24 +31,29 @@ bool RoomManager::JoinRoom(int roomID, int userID, const std::string& password) 
     return true;
 }
 
-bool RoomManager::LeaveRoom(int roomID, int userID) {
+bool RoomManager::LeaveRoom(int roomID, int userID, bool isKick /*= false*/) {
     Room* room = GetRoom(roomID);
     if (!room) return false;
 
+    bool isOwnerLeaving = (room->GetOwnerID() == userID);
     room->RemoveUser(userID);
     
-    // 如果房主离开且房间还有其他用户，则解散房间
-    if(room->GetOwnerID() == userID) {
-        if(room->GetUserCount() > 1) {
-            // 解散房间
-            DeleteRoom(roomID);
-        } else {
-            // 如果只剩房主，则删除房间
+    // 如果是踢出用户（isKick=true），不解散房间，除非房间没有人了
+    if (isKick) {
+        if (room->GetUserCount() == 0) {
             DeleteRoom(roomID);
         }
-    } else if(room->GetUserCount() == 0) {
-        // 如果房间里没有人了，也删除房间
-        DeleteRoom(roomID);
+    } else {
+        // 如果是房主主动离开且房间还有其他用户，则解散房间
+        if (isOwnerLeaving) {
+            if (room->GetUserCount() > 1) {
+                DeleteRoom(roomID);
+            } else {
+                DeleteRoom(roomID);
+            }
+        } else if (room->GetUserCount() == 0) {
+            DeleteRoom(roomID);
+        }
     }
     
     return true;

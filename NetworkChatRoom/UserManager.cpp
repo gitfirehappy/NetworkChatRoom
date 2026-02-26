@@ -1,9 +1,21 @@
 ﻿#include"UserManager.h"
 #include <fstream>
 #include <sstream>
+#include <windows.h>
 
-UserManager::UserManager(const std::string& registryFile) : m_registryFile(registryFile) {
-	ReadRegistry(registryFile);
+std::string UserManager::GetExecutablePath() const {
+	char buffer[MAX_PATH];
+	GetModuleFileNameA(NULL, buffer, MAX_PATH);
+	std::string path(buffer);
+	size_t lastSlash = path.find_last_of("\\/");
+	if (lastSlash != std::string::npos) {
+		return path.substr(0, lastSlash);
+	}
+	return ".";
+}
+
+UserManager::UserManager(const std::string& registryFile) : m_registryFile(GetExecutablePath() + "\\" + registryFile) {
+	ReadRegistry(m_registryFile);
 }
 
 UserManager::~UserManager() {
@@ -29,7 +41,7 @@ bool UserManager::SaveRegistry(const std::string& fileName) {
 	return true;
 }
 
-bool UserManager::Register(const std::string& username, const std::string& password) {
+bool UserManager::Register(const std::string& username, const std::string& password, SOCKET socket) {
 	// 获取下一个可用的用户ID，确保唯一性
 	int userID = m_nextUserID++;
 	
@@ -44,28 +56,42 @@ bool UserManager::Register(const std::string& username, const std::string& passw
 	if (!SaveRegistry(m_registryFile)) {
 		// 如果保存失败，回滚操作
 		m_registryCache.erase(userID);
+		std::string errorMsg = "Registration failed: Unable to save to registry file.\n";
+		SendToSocket(socket, errorMsg);
 		std::cout << "Registration failed: Unable to save to registry file." << std::endl;
 		return false;
 	}
 	
+	std::string successMsg = "Register success! Your ID is: " + std::to_string(userID) + "\n";
+	SendToSocket(socket, successMsg);
 	std::cout << "Register success! Your ID is: " << userID << std::endl;
 	std::cout << "Username: " << username << " (Note: Usernames can be duplicated, but IDs are unique)" << std::endl;
 	return true;
 }
 
+void UserManager::SendToSocket(SOCKET socket, const std::string& message) {
+	send(socket, message.c_str(), static_cast<int>(message.size()), 0);
+}
+
 bool UserManager::Login(int id, const std::string& password, SOCKET socket) {
 	if (!HasRegisted(id)) {
+		std::string errorMsg = "This ID hasn't registered. Please register first.\n";
+		SendToSocket(socket, errorMsg);
 		std::cout << "This ID hasn't registered. Please register first." << std::endl;
 		return false;
 	}
 
 	if (!CheckPassword(id, password)) {
+		std::string errorMsg = "Incorrect password for ID " + std::to_string(id) + ", please re-enter it.\n";
+		SendToSocket(socket, errorMsg);
 		std::cout << "Incorrect password for ID " << id << ", please re-enter it." << std::endl;
 		return false;
 	}
 
 	// 检查用户是否已经在线
 	if (HasUser(id)) {
+		std::string errorMsg = "User ID " + std::to_string(id) + " is already logged in.\n";
+		SendToSocket(socket, errorMsg);
 		std::cout << "User ID " << id << " is already logged in." << std::endl;
 		return false;
 	}

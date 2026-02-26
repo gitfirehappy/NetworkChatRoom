@@ -19,4 +19,5 @@ private:
     std::string GetExecutablePath();
     std::ofstream m_logFile;
     std::mutex m_mutex;
+    bool m_firstLog;
 };

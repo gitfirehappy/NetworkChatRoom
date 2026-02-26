@@ -22,8 +22,28 @@ ChatServer::~ChatServer() {
 	WSACleanup();
 }
 
+bool ChatServer::IsPortInUse(int port) {
+	SOCKET testSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (testSocket == INVALID_SOCKET) {
+		return false;
+	}
+
+	sockaddr_in addr;
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(port);
+	inet_pton(AF_INET, "127.0.0.1", &addr.sin_addr);
+
+	bool inUse = (connect(testSocket, (sockaddr*)&addr, sizeof(addr)) == 0);
+	closesocket(testSocket);
+	return inUse;
+}
+
 void ChatServer::Start() {
 	if (m_isRunning) return;
+
+	if (IsPortInUse(m_port)) {
+		throw std::runtime_error("Server is already running on port " + std::to_string(m_port) + ". Only one server instance is allowed.");
+	}
 
 	// 创建监听套接字
 	m_listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -117,7 +137,8 @@ void ChatServer::ClientHandler(SOCKET clientSocket) {
 
 	// 发送欢迎消息和注册/登录提示
 		std::string welcomeMsg = COLOR_GREEN + "Welcome to Chat Server!\n" + COLOR_RESET + 
-			"Please register(" + COLOR_CYAN + "/register <username> <password>" + COLOR_RESET + ") or login(" + COLOR_CYAN + "/login <id> <password>" + COLOR_RESET + ")\n";
+			"Please register(" + COLOR_CYAN + "/register <username> <password>" + COLOR_RESET + ") or login(" + COLOR_CYAN + "/login <id> <password>" + COLOR_RESET + ")\n" +
+			"Type " + COLOR_CYAN + "/help" + COLOR_RESET + " to view all commands.\n";
 		send(clientSocket, welcomeMsg.c_str(), static_cast<int>(welcomeMsg.size()), 0);
 
 	while ((bytesReceived = recv(clientSocket, buffer, BUFFER_SIZE, 0)) > 0) {
@@ -245,7 +266,7 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 		std::string username, password;
 		iss >> username >> password;
 		
-		if (userManager.Register(username, password)) {
+		if (userManager.Register(username, password, clientSocket)) {
 			std::string response = COLOR_GREEN + "Registration successful!\n" + COLOR_RESET;
 			send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
 			Logger::GetInstance().Log("Command executed: /register " + username);
@@ -319,6 +340,24 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 		
 		int roomID = currentUser->GetRoomID();
 		RoomManager& roomManager = RoomManager::GetInstance();
+		Room* room = roomManager.GetRoom(roomID);
+		bool isOwner = (room && room->GetOwnerID() == currentUser->GetID());
+		
+		if (isOwner) {
+			UserManager& userManager = UserManager::GetInstance();
+			for (int userID : room->GetUsers()) {
+				if (userID != currentUser->GetID()) {
+					User* otherUser = userManager.GetUser(userID);
+					if (otherUser) {
+						otherUser->SetStatus(UserStatus::IN_LOBBY);
+						otherUser->SetRoom(-1);
+						std::string notifyMsg = COLOR_YELLOW + "Room owner left. You have been returned to lobby.\n" + COLOR_RESET;
+						send(otherUser->GetSocket(), notifyMsg.c_str(), static_cast<int>(notifyMsg.size()), 0);
+					}
+				}
+			}
+		}
+		
 		roomManager.LeaveRoom(roomID, currentUser->GetID());
 		currentUser->SetStatus(UserStatus::IN_LOBBY);
 		currentUser->SetRoom(-1);
@@ -360,7 +399,7 @@ bool ChatServer::ProcessCommand(const std::string& message, SOCKET clientSocket)
 			return true;
 		}
 		
-		roomManager.LeaveRoom(roomID, userID);
+		roomManager.LeaveRoom(roomID, userID, true);
 		userToKick->SetStatus(UserStatus::IN_LOBBY);
 		userToKick->SetRoom(-1);
 		

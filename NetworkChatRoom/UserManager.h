@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include<unordered_map>
 #include<string>
 #include<utility>
@@ -14,8 +14,9 @@ public:
 
 	bool ReadRegistry(const std::string& fileName);	// 读取注册表到缓存
 	bool SaveRegistry(const std::string& fileName); // 添加保存功能
-	bool Register(const std::string& username, const std::string& password);
+	bool Register(const std::string& username, const std::string& password, SOCKET socket = INVALID_SOCKET);
 	bool Login(int id, const std::string& password, SOCKET socket);
+	void SendToSocket(SOCKET socket, const std::string& message);
 	bool CancelAccount(int id, const std::string& password);
 	bool HasRegisted(int id) const;
 	bool CheckPassword(int id, const std::string& password);
@@ -47,4 +48,5 @@ private:
 	
 	// 辅助方法
 	int CalculateNextUserID() const;
+	std::string GetExecutablePath() const;
 };

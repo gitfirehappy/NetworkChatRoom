@@ -1,11 +1,13 @@
 #include "Logger.h"
 
-Logger::Logger() {
+Logger::Logger() : m_firstLog(true) {
     std::string logPath = GetExecutablePath() + "\\chat_server.log";
     m_logFile.open(logPath, std::ios::app);
     if (!m_logFile) {
         throw std::runtime_error("Failed to open log file: " + logPath);
     }
+    m_logFile.seekp(0, std::ios::end);
+    m_firstLog = (m_logFile.tellp() > 0);
 }
 
 Logger::~Logger() {
@@ -35,7 +37,12 @@ void Logger::Log(const std::string& message) {
     localtime_s(&local, &now);
 
     std::ostringstream oss;
-    oss << "[" << std::put_time(&local, "%Y-%m-%d %H:%M:%S") << "] " << message;
+    if (m_firstLog) {
+        oss << "\n[" << std::put_time(&local, "%Y-%m-%d %H:%M:%S") << "] " << message;
+        m_firstLog = false;
+    } else {
+        oss << "[" << std::put_time(&local, "%Y-%m-%d %H:%M:%S") << "] " << message;
+    }
 
     m_logFile << oss.str() << std::endl;
 }

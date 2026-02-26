@@ -64,6 +64,8 @@ public:
     void Stop();
 
 private:
+    bool IsPortInUse(int port);
+
     /**
      * 接受新连接的主循环
      * 在独立线程中运行，持续调用 accept() 等待新客户端
